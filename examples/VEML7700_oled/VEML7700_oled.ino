@@ -1,40 +1,96 @@
+/** @file VEML7700_oled.ino
+ *
+ * @brief DevLab VEML7700 example with SSD1306 OLED output.
+ *
+ * @author UNIT Electronics
+ *
+ * @bug No known bugs.
+ */
+
+/******************************************************************************
+ * INCLUDES
+ *****************************************************************************/
+#include <Wire.h>
 #include <Adafruit_SSD1306.h>
-#include "Adafruit_VEML7700.h"
+#include "DevLab_VEML7700.h"
 
-Adafruit_VEML7700 veml = Adafruit_VEML7700();
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+/******************************************************************************
+ * MACROS AND DEFINES
+ *****************************************************************************/
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 32
+#define OLED_I2C_ADDRESS 0x3C
 
+#if defined(ARDUINO_ARCH_ESP32)
+#define DEVLAB_VEML7700_SDA_PIN 6
+#define DEVLAB_VEML7700_SCL_PIN 7
+#endif
+
+/******************************************************************************
+ * GLOBAL OBJECTS
+ *****************************************************************************/
+DevLab_VEML7700 veml = DevLab_VEML7700();
+Adafruit_SSD1306 display = Adafruit_SSD1306(OLED_WIDTH, OLED_HEIGHT, &Wire);
+
+/******************************************************************************
+ * PRIVATE FUNCTIONS
+ *****************************************************************************/
+static void initI2C(void) {
+#if defined(ARDUINO_ARCH_ESP32)
+  Wire.begin(DEVLAB_VEML7700_SDA_PIN, DEVLAB_VEML7700_SCL_PIN);
+#else
+  Wire.begin();
+#endif
+  Wire.setClock(400000);
+}
+
+/******************************************************************************
+ * ARDUINO SETUP AND LOOP
+ *****************************************************************************/
 void setup() {
   Serial.begin(115200);
-  //while (!Serial);
-  Serial.println("VEML7700 demo");
-
-  if (veml.begin()) {
-    Serial.println("Found a VEML7700 sensor");
-  } else {
-    Serial.println("No sensor found ... check your wiring?");
-    while (1);
+  while (!Serial) {
+    delay(10);
   }
 
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
+  Serial.println(F("DevLab VEML7700 OLED Test"));
+  initI2C();
+
+  if (!veml.begin()) {
+    Serial.println(F("Sensor not found"));
+    while (1) {
+      delay(10);
+    }
+  }
+  Serial.println(F("Sensor found"));
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
+    while (1) {
+      delay(10);
+    }
   }
-  display.display();
-  delay(500); // Pause for 2 seconds
+
+  display.clearDisplay();
   display.setTextSize(2);
-  display.setTextColor(WHITE);
+  display.setTextColor(SSD1306_WHITE);
+  display.display();
 
   veml.setGain(VEML7700_GAIN_1);
   veml.setIntegrationTime(VEML7700_IT_100MS);
 }
 
-
 void loop() {
+  float lux = veml.readLux();
+
+  Serial.print(F("Lux: "));
+  Serial.println(lux);
+
   display.clearDisplay();
-  display.setCursor(0,8);
-  display.print("Lux "); display.println(veml.readLux());
+  display.setCursor(0, 8);
+  display.print(F("Lux "));
+  display.println(lux);
   display.display();
-  delay(50);
+
+  delay(250);
 }

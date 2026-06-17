@@ -1,21 +1,19 @@
 /*!
- *  @file Adafruit_VEML7700.h
+ *  @file DevLab_VEML7700.h
  *
  * 	I2C Driver for VEML7700 Lux sensor
  *
- * 	This is a library for the Adafruit VEML7700 breakout:
- * 	http://www.adafruit.com/
+ * 	DevLab VEML7700 sensor library.
  *
- * 	Adafruit invests time and resources providing this open source code,
- *please support Adafruit and open-source hardware by purchasing products from
- * 	Adafruit!
+ * 	Based on original work by Kevin Townsend/Limor Fried for Adafruit
+ * 	Industries.
  *
  *
  *	BSD license (see license.txt)
  */
 
-#ifndef _ADAFRUIT_VEML7700_H
-#define _ADAFRUIT_VEML7700_H
+#ifndef DEVLAB_VEML7700_H
+#define DEVLAB_VEML7700_H
 
 #include "Arduino.h"
 #include <Adafruit_I2CDevice.h>
@@ -80,9 +78,9 @@ typedef enum {
  *    @brief  Class that stores state and functions for interacting with
  *            VEML7700 Light Sensor
  */
-class Adafruit_VEML7700 {
+class DevLab_VEML7700 {
 public:
-  Adafruit_VEML7700();
+  DevLab_VEML7700();
   bool begin(TwoWire *theWire = &Wire);
 
   void enable(bool enable);
